@@ -560,7 +560,7 @@ class Base(object):
 
 	###
 	def OnSuspend(self, event):
-		""" When Stop button is clicked
+		""" When suspend button is clicked
 		"""
 
 		self.Interact()
@@ -967,7 +967,7 @@ def simulator_factory(model, strategy, prof, ntl, verbose, dynamic_structure_fla
 						else:
 							m.finish(None)
 
-					### only for displayed application (-nogui)
+					### resionly for displayed application (-nogui)
 					if wx.GetApp() : wx.CallAfter(playSound, SIMULATION_SUCCESS_SOUND_PATH)
 
 			self.end_flag = True

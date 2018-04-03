@@ -61,6 +61,7 @@ else:
 
 wx.SystemSettings_GetColour = wx.SystemSettings.GetColour if wx.VERSION_STRING >= '4.0' else wx.SystemSettings_GetColour
 
+
 #################################################################
 ###
 ###		GENERAL FUNCTIONS
@@ -255,6 +256,9 @@ class PythonSTC(stc.StyledTextCtrl):
 
 		# Global default styles for all languages
 		self.StyleSetSpec(stc.STC_STYLE_DEFAULT, "face:%(helv)s,size:%(size)d" % faces)
+		#self.StyleSetSpec(STC_CODE_ERROR, 'fore:#FF0000,back:#FFFF00,size:%(size)d' % faces)
+		#self.StyleSetSpec(STC_CODE_SEARCH_RESULT, 'fore:#FFFFFF,back:#FFA500,size:%(size)d' % faces)
+
 		self.StyleClearAll()  # Reset all to be like the default
 
 		# Global default styles for all languages
@@ -536,7 +540,7 @@ class CodeEditor(PythonSTC):
 	### NOTE: CodeEditor :: ShowPosition 		=> Go to the line of selected position
 	def ShowPosition(self, pos):
 		line = self.LineFromPosition(pos)
-		#self.EnsureVisible(line)
+#		self.EnsureVisible(line)
 		self.GotoLine(line)
 
 	### NOTE: CodeEditor :: GetLastPosition 	=> todo
@@ -1187,6 +1191,10 @@ class Base(object):
 		# notebook
 		self.read_only = False
 
+		# find param
+		self.pos = 0
+		self.size = 0
+
 	def update(self, concret_subject=None):
 		""" Update method that manages the embedded editor depending of the selected model in the canvas
 		"""
@@ -1239,6 +1247,8 @@ class Base(object):
 		### edit sub menu----------------------------------------------------
 		edit = wx.Menu()
 
+		self.search = wx.MenuItem(edit, wx.NewId(), _('&Search\tCtrl+F'), _('Search text'))
+
 		self.cut = wx.MenuItem(edit, wx.NewId(), _('&Cut\tCtrl+X'), _('Cut the selection'))
 		self.copy = wx.MenuItem(edit, wx.NewId(), _('&Copy\tCtrl+C'), _('Copy the selection'))
 		self.paste = wx.MenuItem(edit, wx.NewId(), _('&Paste\tCtrl+V'), _('Paste text from clipboard'))
@@ -1262,7 +1272,8 @@ class Base(object):
 										(wx.ACCEL_CTRL,  ord('C'), self.copy.GetId()),
 										(wx.ACCEL_CTRL,  ord('V'), self.paste.GetId()),
 										(wx.ACCEL_CTRL,  ord('D'), comment.GetId()),
-										(wx.ACCEL_CTRL| wx.ACCEL_SHIFT,  ord('D'), uncomment.GetId())
+										(wx.ACCEL_CTRL| wx.ACCEL_SHIFT,  ord('D'), uncomment.GetId()),
+										(wx.ACCEL_CTRL,  ord('F'), self.search.GetId())
 										])
 		self.SetAcceleratorTable(accel_tbl)
 
@@ -1273,6 +1284,7 @@ class Base(object):
 			edit.AppendItem(reindent)
 			edit.AppendItem(comment)
 			edit.AppendItem(uncomment)
+			edit.AppendItem(self.search)
 			edit.AppendSeparator()
 			edit.AppendItem(delete)
 			edit.AppendSeparator()
@@ -1284,6 +1296,7 @@ class Base(object):
 			edit.Append(reindent)
 			edit.Append(comment)
 			edit.Append(uncomment)
+			edit.Append(self.search)
 			edit.AppendSeparator()
 			edit.Append(delete)
 			edit.AppendSeparator()
@@ -1326,11 +1339,14 @@ class Base(object):
 		self.Bind(wx.EVT_MENU, self.nb.OnPaste, id=self.paste.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnReIndent, id=reindent.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnComment, id=comment.GetId())
+		self.Bind(wx.EVT_MENU, self.OnSearch, id=self.search.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnUnComment, id=uncomment.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnDelete, id=delete.GetId())
 		self.Bind(wx.EVT_MENU, self.nb.OnSelectAll, id=select.GetId())
 		self.Bind(wx.EVT_MENU, self.ToggleStatusBar, id=showStatusBar.GetId())
 		self.Bind(wx.EVT_MENU, self.OnAbout, id=about.GetId())
+		self.Bind(wx.EVT_FIND, self.OnFind)
+		self.Bind(wx.EVT_FIND_NEXT, self.OnFind)
 
 		return menubar
 
@@ -1480,6 +1496,29 @@ class Base(object):
 			### status bar notification
 			self.Notification(False, _('%s not saved' % fn), _('file in readonly'), '')
 
+	def OnSearch(self, evt):
+		currentPage = self.nb.GetCurrentPage()
+		self.txt = currentPage.GetValue().encode('utf-8')
+		self.data = wx.FindReplaceData()   # initializes and holds search parameters
+		self.dlg = wx.FindReplaceDialog(currentPage, self.data, 'Find')
+		self.dlg.Show()
+	
+	def OnFind(self, evt):
+		fstring = self.data.GetFindString()          # also from event.GetFindString()
+		self.pos = self.txt.find(fstring, self.pos+self.size)
+		self.size = len(fstring)
+
+		highlight_start_pos = self.pos
+		highlight_end_pos = self.pos+self.size
+
+		### go to the finded word
+		currentPage = self.nb.GetCurrentPage()
+		currentPage.GotoPos(self.pos)
+		
+		currentPage.StartStyling(highlight_start_pos, 0xff)
+		currentPage.SetStyling(highlight_end_pos - highlight_start_pos, stc.STC_P_COMMENTLINE)
+		currentPage.StartStyling(highlight_end_pos, 0x00)
+		currentPage.SetStyling(len(self.txt) - highlight_end_pos, stc.STC_STYLE_DEFAULT)
 
 	def OnSaveAsFile(self, event):
 		"""
