@@ -17,7 +17,7 @@ class PriorityGUI(wx.Frame):
 							size = (350, 300),
 							style = wx.FRAME_NO_WINDOW_MENU|wx.DEFAULT_FRAME_STYLE|wx.CLOSE_BOX| wx.STAY_ON_TOP)
 
-		icon = wx.EmptyIcon()
+		icon = wx.EmptyIcon() if wx.VERSION_STRING < '4.0' else wx.Icon()
 		icon.CopyFromBitmap(wx.Bitmap(os.path.join(ICON_PATH_16_16, "priority.png"), wx.BITMAP_TYPE_ANY))
 		self.SetIcon(icon)
 
@@ -38,6 +38,9 @@ class PriorityGUI(wx.Frame):
 			#self.listCtrl.InsertImageStringItem(maxint,item,0)
 			self.listCtrl.InsertStringItem(maxint, item)
 
+		if wx.VERSION_STRING >= '4.0':
+			self.listCtrl.SetToolTipString = self.listCtrl.SetToolTip
+		
 		self.listCtrl.SetToolTipString(_('Drag and drop a model in order to define its priority'))
 
 		### id list not empty, first item is selected
