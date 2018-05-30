@@ -83,8 +83,6 @@ def GetClass(elem):
 		moduleName = path_to_module(elem)
 
 		for cls in clsmembers.values():
-			#print 'sdf', str(cls.__module__), moduleName, str(cls.__module__) in str(moduleName)
-
 			if str(cls.__module__) in str(moduleName):
 				return cls
 	else:
@@ -356,15 +354,16 @@ class AMDComponent(GenericComponent):
 
 		m = AMDComponent.BlockModelAdapter(cls, label)
 
+		
 		load_file_result = m.LoadFile(filename)
-
+		
 		if isinstance(load_file_result, Exception):
 			wx.MessageBox(_('Error loading %s model : %s '%(label, load_file_result)), _('Error'), wx.OK | wx.ICON_ERROR)
 			return None
 		else:
 			### mandatory due to the LoadFile call before
 			m.label = label
-
+			
 			return AMDComponent.ChekFilename(filename, m)
 
 	@staticmethod
@@ -540,8 +539,6 @@ class DEVSComponent:
 		log_file = os.path.join(gettempdir(),'%s.devsimpy.log'%label)
 		parent = event.GetClientData()
 
-		print log_file
-
 		if os.path.exists(log_file):
 			### read log file
 			with open(log_file, 'r') as f:
@@ -578,7 +575,7 @@ class DEVSComponent:
 				del self.priority_list[index]
 
 			self.priority_list += added_models
-
+ 
 	###
 	def OnEditor(self, event):
 		""" Method that edit the python code of associated devs model of the Block
