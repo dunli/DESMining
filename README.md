@@ -27,7 +27,9 @@ With DEVSimPy we can:
 
 # Installation
 To get DEVSimPy V3.0 package with all Git submodule: 
-```sh git clone --recurse-submodules -b version-3.0 https://github.com/capocchi/DEVSimPy.git .```
+```sh
+git clone --recurse-submodules -b version-3.0 https://github.com/capocchi/DEVSimPy.git .
+```
 
 DEVSimPy don't require installation and works on all platforms. To launch DEVSimPy, you need to execute the devsimpy.py file into a Python prompt:
 ```sh
