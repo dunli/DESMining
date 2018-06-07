@@ -25,7 +25,8 @@ With DEVSimPy we can:
 - Generate YAML models for the DEVSimPy-mob mobile application.
 - and more.
 
-#Installation
+# Installation
+To get DEVSimPy V3.0 package with all Git submodule: git clone --recurse-submodules -b version-3.0 https://github.com/capocchi/DEVSimPy.git .
 DEVSimPy don't require installation and works on all platforms. To launch DEVSimPy, you need to execute the devsimpy.py file into a Python prompt:
 ```sh
 $ python devsimpy.py
