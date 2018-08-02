@@ -1696,11 +1696,11 @@ if __builtin__.__dict__['GUI_FLAG']:
 					self.select(item)
 				event.Skip()
 			elif key == 82 and controlDown:  # Rotate model on the right
-				for s in filter(lambda shape: not isinstance(shape, ConnectionShape), self.selectedShapes):
+				for s in filter(lambda shape: not isinstance(shape, ConnectionShape), self.getSelectedShapes()):
 					s.OnRotateR(event)
 				event.Skip()
 			elif key == 76 and controlDown:  # Rotate model on the left
-				for s in filter(lambda shape: not isinstance(shape, ConnectionShape), self.selectedShapes):
+				for s in filter(lambda shape: not isinstance(shape, ConnectionShape), self.getSelectedShapes()):
 					s.OnRotateL(event)
 				event.Skip()
 			elif key == 9: # TAB
@@ -1847,7 +1847,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 			self.deselect()
 			self.select(target)
 
-			nodesList=filter(lambda n: not isinstance(n, ResizeableNode), self.nodes)
+			nodesList = filter(lambda n: not isinstance(n, ResizeableNode), self.nodes)
 
 			if isinstance(target,Block):
 				if isinstance(source, oPort):
@@ -1864,7 +1864,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 					else:
 						targetNodeList = filter(lambda n: not n in sourceNodeList and isinstance(n,INode),nodesList)
 
-			elif isinstance(target,iPort):
+			elif isinstance(target, iPort):
 				if isinstance(source, oPort):
 					sourceNodeList = sourceINodeList
 				elif isinstance(source, iPort):
@@ -1874,7 +1874,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 
 				targetNodeList = filter(lambda n: not n in sourceONodeList and isinstance(n,ONode),nodesList)
 
-			elif isinstance(target,oPort):
+			elif isinstance(target, oPort):
 				if isinstance(source, oPort):
 					sourceNodeList = sourceINodeList
 				elif isinstance(source, iPort):
@@ -1884,7 +1884,8 @@ if __builtin__.__dict__['GUI_FLAG']:
 				targetNodeList = filter(lambda n: not n in sourceINodeList and isinstance(n,INode),nodesList)
 			else:
 				targetNodeList = []
-
+				sourceNodeList = []
+			
 			return (sourceNodeList, targetNodeList)
 
 		def OnConnectTo(self, event):
@@ -2335,7 +2336,8 @@ if __builtin__.__dict__['GUI_FLAG']:
 				if not self.HasCapture():
 					self.CaptureMouse()
 				self.overlay = wx.Overlay()
-				self.selectionStart = event.Position
+				if isinstance(event,wx.MouseEvent):
+					self.selectionStart = event.Position
 
 			else:
 
@@ -2347,7 +2349,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 						self.deselect()
 
 					self.select(item)
-
+					
 				### else each other are considered
 				else:
 
@@ -2378,7 +2380,6 @@ if __builtin__.__dict__['GUI_FLAG']:
 			"""
 			shape = self.getCurrentShape(event)
 
-			
 			self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
 			
 			### clic sur un block
@@ -2469,10 +2470,11 @@ if __builtin__.__dict__['GUI_FLAG']:
 				## User released left button, change cursor back
 				if self.HasCapture():
 					self.ReleaseMouse()
-					if wx.VERSION_STRING < '4.0':
-						self.permRect = wx.RectPP(self.selectionStart, event.Position)
-					else:
-						self.permRect = wx.Rect(self.selectionStart, event.Position)
+					if isinstance(event,wx.MouseEvent):
+						if wx.VERSION_STRING < '4.0':
+							self.permRect = wx.RectPP(self.selectionStart, event.Position)
+						else:
+							self.permRect = wx.Rect(self.selectionStart, event.Position)
 
 					self.selectionStart = None
 					self.overlay.Reset()
@@ -2493,8 +2495,9 @@ if __builtin__.__dict__['GUI_FLAG']:
 							if bool:
 								self.select(s)
 						except AttributeError, info:
-							raise AttributeError, _("use >= wx-2.8-gtk-unicode library: %s")%info
-							#clear out any existing drawing
+							if self.permRect:
+								raise AttributeError, _("use >= wx-2.8-gtk-unicode library: %s")%info
+								#clear out any existing drawing
 
 			self.Refresh()
 
@@ -2721,15 +2724,16 @@ if __builtin__.__dict__['GUI_FLAG']:
 			""" Return the selected current shape.
 			"""
 			# get coordinate of click in our coordinate system
-			point = self.getEventCoordinates(event)
-			self.currentPoint = point
+			if isinstance(event,wx.MouseEvent):
+				point = self.getEventCoordinates(event)
+				self.currentPoint = point
 
-			# Look to see if an item is selected
-			for item in self.nodes + self.diagram.shapes:
-				if item.HitTest(point[0], point[1]):
-					return item
-
-			return None
+				# Look to see if an item is selected
+				for item in self.nodes + self.diagram.shapes:
+					if item.HitTest(point[0], point[1]):
+						return item
+			else:
+				return None
 
 		def GetXY(self, m, x, y):
 			""" Give x and y of model m into canvas.
@@ -2762,7 +2766,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 			""" Check of shape s is selected.
 				If s is a ConnectableNode object, it implies that is visible and then selected !
 			"""
-			return (s) and (s in self.selectedShapes) or isinstance(s, ConnectableNode)
+			return (s) and (s in self.getSelectedShapes()) or isinstance(s, ConnectableNode)
 
 		def getName(self):
 			""" Return the name
@@ -2774,13 +2778,13 @@ if __builtin__.__dict__['GUI_FLAG']:
 			"""
 
 			if item is None:
-				for s in self.selectedShapes:
+				for s in self.getSelectedShapes():
 					s.OnDeselect(None)
 				del self.selectedShapes[:]
 				del self.nodes[:]
 			else:
 				self.nodes = [ n for n in self.nodes if n.item != item]
-				self.selectedShapes = [ n for n in self.selectedShapes if n != item]
+				self.selectedShapes = [ n for n in self.getSelectedShapes() if n != item]
 				item.OnDeselect(None)
 
 		### selectionne un shape
@@ -2789,7 +2793,7 @@ if __builtin__.__dict__['GUI_FLAG']:
 			"""
 
 			if item is None:
-				return self.selectedShapes
+				return self.getSelectedShapes()
 
 			if isinstance(item, Node):
 				del self.selectedShapes[:]
@@ -2797,13 +2801,17 @@ if __builtin__.__dict__['GUI_FLAG']:
 				return
 
 			if not self.isSelected(item):
+				
 				self.selectedShapes.append(item)
+				
 				item.OnSelect(None)
 				if isinstance(item, Connectable):
 					self.nodes.extend([INode(item, n, self) for n in xrange(item.input)])
 					self.nodes.extend([ONode(item, n, self) for n in xrange(item.output)])
 				if isinstance(item, Resizeable):
 					self.nodes.extend([ResizeableNode(item, n, self) for n in xrange(len(item.x))])
+					
+			return 
 
 		###
 		def UpdateShapes(self, L=None):

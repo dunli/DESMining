@@ -243,6 +243,14 @@ class DetachedFrame(wx.Frame, PrintOut.Printable):
 		""" Close event has been received.
 		"""
 		canvas = self.GetCanvas()
+		### bug fixe for windows since wx 4.0
+		if sys.platform.startswith('win'):
+			try:
+				canvas.OnLeftDown(event)
+				canvas.OnLeftUp(event)
+			except:
+				pass
+
 		canvas.Refresh()
 		### Destroy the windows
 		self.Destroy()
