@@ -345,7 +345,7 @@ if wx.VERSION_STRING >= '4.0':
 	wx.AboutBox = wx.adv.AboutBox
 	
 ### specific built-in variables. (don't modify the default value. If you want to change it, go to the PreferencesGUI from devsimpy interface.)
-builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'),
+builtin_dict = {'SPLASH_PNG': os.path.join(ABS_HOME_PATH, 'splash', 'splash.png'), # abslolute path
 				'DEVSIMPY_PNG': 'iconDEVSimPy.png',	# png file for devsimpy icon
 				'HOME_PATH': ABS_HOME_PATH,
 				'ICON_PATH': os.path.join(ABS_HOME_PATH, 'icons'),
@@ -382,7 +382,7 @@ path = os.path.join(ABS_HOME_PATH,'DEVSKernel','PyPDEVS','pypdevs241')
 if not len(os.listdir(path)) == 0:
     builtin_dict['DEVS_DIR_PATH_DICT'].update({'PyPDEVS_241':os.path.join(path ,'src','pypdevs')})
 else:
-	sys.stdout.write(_("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (http://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)")%path)
+	sys.stdout.write("PyPDEVS Kernel in version 2.4.1 is not loaded.\nPlease install it in the directory %s using git (http://msdl.uantwerpen.be/git/yentl/PythonPDEVS.git)"%path)
 
 ### here berfore the __main__ function
 ### warning, some module (like SimulationGUI) initialise GUI_FLAG macro before (import block below)
@@ -834,6 +834,7 @@ class MainApplication(wx.Frame):
 		### undo and redo button desabled
 		self.tb.EnableTool(wx.ID_UNDO, False)
 		self.tb.EnableTool(wx.ID_REDO, False)
+	
 		self.tb.EnableTool(Menu.ID_PRIORITY_DIAGRAM, not 'PyPDEVS' in __builtin__.__dict__['DEFAULT_DEVS_DIRNAME'])
 
 		### default direct connector toogled
@@ -1339,7 +1340,10 @@ class MainApplication(wx.Frame):
 
 				if isinstance(open_file_result, Exception):
 					type, value, traceback = sys.exc_info()
-					wx.MessageBox(_('Error opening %s: %s')%(value.filename, value.strerror), 'Error', wx.OK | wx.ICON_ERROR)
+					if value:
+						wx.MessageBox(_('Error opening %s: %s')%(value.filename, value.strerror), 'Error', wx.OK | wx.ICON_ERROR)
+					else:	
+						sys.stdout.write(_('Error opening %s')%(fileName))
 				else:
 					self.nb2.AddEditPage(os.path.splitext(fileName)[0], diagram)
 
@@ -1631,7 +1635,7 @@ class MainApplication(wx.Frame):
 		"""
 
 		# dialog pour l'importation de lib DEVSimPy (dans Domain) et le local
-		dlg = ImportLibrary(self, wx.ID_ANY, _('New/Import Library manager'), size=(550,400), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+		dlg = ImportLibrary(self, wx.ID_ANY, _('New/Import Library'), size=(550,400), style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 
 		if (dlg.ShowModal() == wx.ID_OK):
 

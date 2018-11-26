@@ -1,4 +1,5 @@
-﻿# -*- coding: utf-8 -*-
+﻿#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 # AttributeEditor.py ---
@@ -27,7 +28,7 @@ import linecache
 import wx
 
 import DiagramNotebook
-import Components
+#import Components
 
 from PropertiesGridCtrl import PropertiesGridCtrl, CodeCB
 from DetachedFrame import DetachedFrame

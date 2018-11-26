@@ -35,7 +35,7 @@ from ExperimentGenerator import ExperimentGenerator
 
 _ = wx.GetTranslation
 
-if wx.VERSION_STRING >= '4.0': wx.NewId = wx.NewIdRef
+if wx.VERSION_STRING > '4.0.1': wx.NewId = wx.NewIdRef
 
 #File menu identifiers
 ID_NEW = wx.ID_NEW
@@ -315,8 +315,15 @@ class PerspectiveMenu(wx.Menu):
 
 		parent = parent.GetParent()
 
-		self.Append(ID_NEW_PERSPECTIVE, _("New"))
-		self.Append(ID_DELETE_PERSPECTIVE, _("Delete all"))
+		AppendItem = self.AppendItem if wx.VERSION_STRING < '4.0' else self.Append
+
+		new = wx.MenuItem(self, ID_NEW_PERSPECTIVE, _('New'),_('New perspective'))
+		new.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'new.png')))
+		deleteall = wx.MenuItem(self, ID_DELETE_PERSPECTIVE, _('Delete all'),_('Delete all perspectives'))
+		deleteall.SetBitmap(wx.Bitmap(os.path.join(ICON_PATH,'delete.png')))
+
+		AppendItem(new)
+		AppendItem(deleteall)
 		self.AppendSeparator()
 
 		if _("Default Startup") not in parent.perspectives:
