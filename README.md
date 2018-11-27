@@ -27,11 +27,14 @@ With DEVSimPy we can:
 
 # Installation
 
-DEVSimPy depends on PyPubSub version 3.3.1: pip install PyPubSub==3.3.1
+DEVSimPy depends on PyPubSub version 3.3.1: 
+```sh
+$ pip install PyPubSub==3.3.1
+```
 
 To get DEVSimPy V3.0 package with all Git submodule: 
 ```sh
-git clone --recurse-submodules -b version-3.0 https://github.com/capocchi/DEVSimPy.git .
+$ git clone --recurse-submodules -b version-3.0 https://github.com/capocchi/DEVSimPy.git .
 ```
 
 DEVSimPy don't require installation and works on all platforms. To launch DEVSimPy, you need to execute the devsimpy.py file into a Python prompt:
