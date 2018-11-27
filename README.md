@@ -26,6 +26,9 @@ With DEVSimPy we can:
 - and more.
 
 # Installation
+
+DEVSimPy depends on PyPubSub version 3.3.1: pip install PyPubSub==3.3.1
+
 To get DEVSimPy V3.0 package with all Git submodule: 
 ```sh
 git clone --recurse-submodules -b version-3.0 https://github.com/capocchi/DEVSimPy.git .
