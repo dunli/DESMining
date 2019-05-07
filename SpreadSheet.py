@@ -259,6 +259,7 @@ class Newt(wx.Frame):
 		sheet = MySheet(self.notebook, data)
 		sheet.SetFocus()
 		self.notebook.AddPage(sheet, label)
+		self.notebook.ChangeSelection(sheet)
 
 		### enable delete button
 		toolbar = self.GetToolBar()
@@ -294,8 +295,9 @@ class Newt(wx.Frame):
 					dlg.Destroy()
 
 					data = self.FileToData(fn, separator)
-					label = _('New %d'%self.notebook.GetPageCount())
+					label = _('New %d - %s'%(os.path.basename(fn),self.notebook.GetPageCount()))
 					self.AddPage(data, label)
+					
 
 	###
 	def OnSaveAs(self, event):
@@ -311,11 +313,11 @@ class Newt(wx.Frame):
 			sheet = self.notebook.GetPage(activePage)
 			nbr = sheet.GetNumberRows()
 			nbc = sheet.GetNumberCols()
-			#print "sdf", fn
+
 			with open(fn,'w') as f:
 				for row in xrange(nbr):
 					#print sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)
-					f.write("%s %s\n"%(sheet.GetCellValue(row,0),sheet.GetCellValue(row,1)))
+					f.write("%s %s\n"%(sheet.GetCellValue(row,0),sheet.GetCellValue(row,1).replace(" ","")))
 
 	###
 	def OnCopy(self, event):
@@ -392,7 +394,7 @@ class Newt(wx.Frame):
 			v = sheet.GetCellValue(i,sheet.GetNumberCols()-1)
 			
 			if '<<' in v or '>>' in v: 
-				s = sheet.GetCellValue(i,sheet.GetNumberCols()-1).replace('<< ', '').replace('>>','') 
+				s = sheet.GetCellValue(i,sheet.GetNumberCols()-1).replace('<< ', '').replace('<<', '').replace('>>','') 
 			else:
 				s = "value = %s; time = %s"%(v,sheet.GetCellValue(i,0))
 
